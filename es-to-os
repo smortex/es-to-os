@@ -1,0 +1,64 @@
+#!/bin/sh
+# Reindex indices form an (old) ElasticSearch instance (6.8) to a (recent) OpenSearch one (2.x)
+
+set -e
+
+export TZ=GMT
+
+elasticsearch()
+{
+  method=$1; shift
+  path=$1; shift
+  curl --fail -sS -X $method -H 'Accept: application/json' -H 'Content-Type: application/json' "$@" http://localhost:9200/$path
+}
+
+opensearch()
+{
+  method=$1; shift
+  path=$1; shift
+  curl --fail -sS -X $method -H 'Accept: application/json' -H 'Content-Type: application/json' --insecure -u admin:admin "$@"  https://localhost:9201/$path
+}
+
+format_seconds()
+{
+  echo $1 | awk '{ s = $1 / 1000;  h = s / 3600; m = (s % 3600) / 60 ; s = s % 60 ;  printf "%2d:%02d:%02d\n", h , m, s }'
+}
+
+TEMPLATES="logs samplerr"
+
+es_templates=$(elasticsearch GET _template | jq -r 'keys | join("\n")' | grep -v 'kibana_index_template:.kibana')
+os_templates=$(opensearch GET _index_template | jq -r '.index_templates | .[] | .name')
+
+for template in $es_templates; do
+  if ! echo "${os_templates}" | grep -q $template; then
+    echo "[+] Setup index template $template..."
+    opensearch PUT _index_template/$template -d "$(elasticsearch GET _template/$template | jq '.'$template' | {"index_patterns": .index_patterns, "template": { "settings": .settings.index, "mappings": {"properties": (.mappings.event.properties // .mappings.samplerr.properties) }}}')" > /dev/null
+  fi
+done
+
+es_indices=$(elasticsearch GET _cat/indices | jq -r '.[] | .index' | grep -E '^(logs|\.samplerr)-' | grep -v -- "-$(date '+%Y.%m.%d')\$" | grep -v -- "-$(date '+%Y.%m')\$" | grep -v -- "-$(date '+%Y')\$")
+os_indices=$(opensearch GET _cat/indices | jq -r '.[] | .index')
+
+for index in $es_indices; do
+  if ! echo "${os_indices}" | grep -q $index; then
+    printf '[+] Reindexing %s...' $index
+    (opensearch POST _reindex -d "
+{
+  \"source\":{
+    \"index\":\"$index\",
+    \"remote\":{
+      \"host\":\"http://localhost:9200\"
+    }
+  },
+  \"dest\":{
+    \"index\":\"$index\"
+  }
+}") > /tmp/out
+    printf '\033[50G%s\n' $(format_seconds $(jq .took /tmp/out))
+    if [ $(jq '.failures | length' /tmp/out) -gt 0 ]; then
+      echo "[!] Error detected while reindexing $index:"
+      jq '.failures' /tmp/out
+      exit 1
+    fi
+  fi
+done

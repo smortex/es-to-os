@@ -1,0 +1,14 @@
+#!/bin/sh
+# List indices with a different number of documents in ElasticSearch and OpenSearch.
+
+set -e
+
+export LC_ALL=C
+
+es_data=$(mktemp)
+os_data=$(mktemp)
+
+curl --fail -sS 'http://localhost:9200/_cat/indices' | sort | awk '$3 ~ /^(logs|.samplerr)-/ { print $3, $7 }' > $es_data
+curl --fail -sS --insecure -u admin:admin 'https://localhost:9201/_cat/indices' | sort | awk '$3 ~ /^(logs|.samplerr)-/ { print $3, $7 }' > $os_data
+join $es_data $os_data | awk '$2 != $3 { printf("%s %+10d\n", $1, $2 - $3) }'
+rm -r $es_data $os_data
