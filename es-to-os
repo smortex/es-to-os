@@ -57,7 +57,7 @@ for template in $es_templates; do
   fi
 done
 
-es_indices=$(elasticsearch GET _cat/indices | jq -r '.[] | .index' | grep -E '^(ogs|\.samplerr)-')
+es_indices=$(elasticsearch GET _cat/indices | jq -r '.[] | .index' | grep -E '^(logs|\.samplerr)-')
 os_indices=$(opensearch GET _cat/indices | jq -r '.[] | .index')
 
 for index in $es_indices; do
