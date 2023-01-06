@@ -53,7 +53,7 @@ os_templates=$(opensearch GET _index_template | jq -r '.index_templates | .[] | 
 for template in $es_templates; do
   if ! echo "${os_templates}" | grep -q $template; then
     echo "[+] Setup index template $template..."
-    opensearch PUT _index_template/$template -d "$(elasticsearch GET _template/$template | jq '.'$template' | {"index_patterns": .index_patterns, "template": { "settings": .settings.index, "mappings": {"properties": (.mappings.event.properties // .mappings.samplerr.properties) }}}')" > /dev/null
+    opensearch PUT _index_template/$template -d "$(elasticsearch GET _template/$template | jq '.'$template' | {"index_patterns": .index_patterns, "template": { "settings": .settings.index, "mappings": {"properties": .mappings | .[keys[0]] | .properties }}}')" > /dev/null
   fi
 done
 
