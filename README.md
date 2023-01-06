@@ -36,7 +36,7 @@ These tools where build within our context. It might need some adjustments to fi
 
 * [ ] Install OpenSearch;
 * [ ] Adjust `config/opensearch.yml`:
-```
+```yaml
 http.port: 9201
 reindex.remote.whitelist: "localhost:9200"
 ```
@@ -46,7 +46,7 @@ reindex.remote.whitelist: "localhost:9200"
 
 * [ ] Install OpenSearch-Dashboards
 * [ ] Adjust `config/opensearch_dashboards.yml`:
-```
+```yaml
 server.port: 5602
 opensearch.hosts: [https://localhost:9201]
 ```
@@ -72,7 +72,7 @@ opensearch.hosts: [https://localhost:9201]
 #### Migrate idle data
 
 * [ ] Run `es-to-os`:
-```
+```sh-session
 opensearch@localhost ~/es-to-os % ./es-to-os
 [+] Setup index template logs...
 [+] Setup index template samplerr...
@@ -103,7 +103,7 @@ opensearch@localhost ~/es-to-os % ./es-to-os
 
 * [ ] Stop services that write data to ElasticSearch
 * [ ] Run `es-to-os -f`:
-```
+```sh-session
 opensearch@localhost ~/es-to-os % ./es-to-os -f
 ```
 * [ ] Stop ElasticSearch
@@ -115,7 +115,7 @@ opensearch@localhost ~/es-to-os % ./es-to-os -f
 
 
 * [ ] Adjust `config/opensearch.yml`:
-```
+```yaml
 http.port: 9200
 #reindex.remote.whitelist: "localhost:9200"
 ```
@@ -126,7 +126,7 @@ http.port: 9200
 #### Switch to OpenSearch-Dashboards
 
 * [ ] Adjust `config/opensearch_dashboards.yml`:
-```
+```yaml
 server.port: 5601
 opensearch.hosts: [https://localhost:9200]
 ```
