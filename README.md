@@ -99,6 +99,10 @@ opensearch@localhost ~/es-to-os % ./es-to-os
 [+] Reindexing .samplerr-2021...
 ```
 
+If the script is interrupted, or if an error is detected, some indexes may exist but only have a portion of the expected data.  Only indices that do not exist are reindexed, so these partial indices should be removed before trying to reindexing them. The `diff-es-os` script list indices that exist in both ElasticSearch and OpenSearch but have a different number of documents.
+
+Note that we experienced situations where after reindex, OpenSearch did not report the expected number of documents.  Restarting OpenSearch fixed this issue.
+
 #### Migrate live data
 
 * [ ] Stop services that write data to ElasticSearch
