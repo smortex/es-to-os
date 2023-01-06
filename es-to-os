@@ -24,7 +24,28 @@ format_seconds()
   echo $1 | awk '{ s = $1 / 1000;  h = s / 3600; m = (s % 3600) / 60 ; s = s % 60 ;  printf "%2d:%02d:%02d\n", h , m, s }'
 }
 
-TEMPLATES="logs samplerr"
+usage()
+{
+  cat << HELP
+usage: $0 [-f]
+
+Available options:
+  -f    Force reindexing of all indices (by default current ones are excluded)
+HELP
+  exit 1
+}
+
+skip_indices_matching="-($(date '+%Y.%m.%d')|$(date '+%Y.%m')|$(date '+%Y'))\$"
+
+args=$(getopt 'fh' "$@")
+set -- $args
+while :; do
+	case $1 in
+		-f) skip_indices_matching=''; shift;;
+		-h) usage;;
+		--) shift; break;
+	esac
+done
 
 es_templates=$(elasticsearch GET _template | jq -r 'keys | join("\n")' | grep -v 'kibana_index_template:.kibana')
 os_templates=$(opensearch GET _index_template | jq -r '.index_templates | .[] | .name')
@@ -36,11 +57,16 @@ for template in $es_templates; do
   fi
 done
 
-es_indices=$(elasticsearch GET _cat/indices | jq -r '.[] | .index' | grep -E '^(logs|\.samplerr)-' | grep -v -- "-$(date '+%Y.%m.%d')\$" | grep -v -- "-$(date '+%Y.%m')\$" | grep -v -- "-$(date '+%Y')\$")
+es_indices=$(elasticsearch GET _cat/indices | jq -r '.[] | .index' | grep -E '^(ogs|\.samplerr)-')
 os_indices=$(opensearch GET _cat/indices | jq -r '.[] | .index')
 
 for index in $es_indices; do
   if ! echo "${os_indices}" | grep -q $index; then
+    if [ -n "$skip_indices_matching" ] && echo $index | grep -qE -- $skip_indices_matching; then
+      echo "[!] Skipping index $index because it can be active (rerun with -f to force reindex)"
+      continue
+    fi
+
     printf '[+] Reindexing %s...' $index
     (opensearch POST _reindex -d "
 {
