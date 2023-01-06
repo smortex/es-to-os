@@ -61,7 +61,7 @@ es_indices=$(elasticsearch GET _cat/indices | jq -r '.[] | .index' | grep -E '^(
 os_indices=$(opensearch GET _cat/indices | jq -r '.[] | .index')
 
 for index in $es_indices; do
-  if ! echo "${os_indices}" | grep -qw "${index}"; then
+  if ! echo "${os_indices}" | grep -qx "${index}"; then
     if [ -n "$skip_indices_matching" ] && echo $index | grep -qE -- $skip_indices_matching; then
       echo "[!] Skipping index $index because it can be active (rerun with -f to force reindex)"
       continue
