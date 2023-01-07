@@ -74,29 +74,29 @@ opensearch.hosts: [https://localhost:9201]
 * [ ] Run `es-to-os`:
 ```sh-session
 opensearch@localhost ~/es-to-os % ./es-to-os
-[+] Setup index template logs...
-[+] Setup index template samplerr...
-[+] Reindexing logs-2022.01.23...                0:01:15
-[+] Reindexing logs-2022.04.16...                0:02:29
-[+] Reindexing logs-2022.02.18...                0:02:10
-[+] Reindexing logs-2022.02.01...                0:02:22
-[+] Reindexing logs-2022.07.05...                0:03:39
-[+] Reindexing logs-2022.11.10...                0:02:53
-[+] Reindexing logs-2022.11.08...                0:10:58
-[+] Reindexing logs-2022.10.14...                0:10:14
-[+] Reindexing logs-2022.07.06...                0:04:03
-[+] Reindexing logs-2022.04.24...                0:02:29
-[+] Reindexing logs-2022.10.11...                0:14:38
-[+] Reindexing logs-2022.08.28...                0:02:33
-[+] Reindexing logs-2022.12.05...                0:04:58
-[+] Reindexing .samplerr-2023.01.01...           0:43:30
-[+] Reindexing logs-2022.09.26...                0:03:50
-[+] Reindexing logs-2022.05.22...                0:02:21
-[+] Reindexing logs-2022.04.29...                0:03:41
-[+] Reindexing logs-2022.07.17...                0:10:21
-[+] Reindexing logs-2022.08.03...                0:03:48
-[+] Reindexing logs-2022.02.27...                0:01:42
-[+] Reindexing .samplerr-2021...
+[*] Setup index template logs...
+[*] Setup index template samplerr...
+[*] Reindexing logs-2022.01.23...                0:01:15
+[*] Reindexing logs-2022.04.16...                0:02:29
+[*] Reindexing logs-2022.02.18...                0:02:10
+[*] Reindexing logs-2022.02.01...                0:02:22
+[*] Reindexing logs-2022.07.05...                0:03:39
+[*] Reindexing logs-2022.11.10...                0:02:53
+[*] Reindexing logs-2022.11.08...                0:10:58
+[*] Reindexing logs-2022.10.14...                0:10:14
+[*] Reindexing logs-2022.07.06...                0:04:03
+[*] Reindexing logs-2022.04.24...                0:02:29
+[*] Reindexing logs-2022.10.11...                0:14:38
+[*] Reindexing logs-2022.08.28...                0:02:33
+[*] Reindexing logs-2022.12.05...                0:04:58
+[*] Reindexing .samplerr-2023.01.01...           0:43:30
+[*] Reindexing logs-2022.09.26...                0:03:50
+[*] Reindexing logs-2022.05.22...                0:02:21
+[*] Reindexing logs-2022.04.29...                0:03:41
+[*] Reindexing logs-2022.07.17...                0:10:21
+[*] Reindexing logs-2022.08.03...                0:03:48
+[*] Reindexing logs-2022.02.27...                0:01:42
+[*] Reindexing .samplerr-2021...
 ```
 
 If the script is interrupted, or if an error is detected, some indexes may exist but only have a portion of the expected data.  Only indices that do not exist are reindexed, so these partial indices should be removed before trying to reindexing them. The `diff-es-os` script list indices that exist in both ElasticSearch and OpenSearch but have a different number of documents.
@@ -109,6 +109,11 @@ Note that we experienced situations where after reindex, OpenSearch did not repo
 * [ ] Run `es-to-os -f`:
 ```sh-session
 opensearch@localhost ~/es-to-os % ./es-to-os -f
+[*] Reindexing .samplerr-2023.01.07...           0:00:19
+[*] Reindexing logs-2023.01.07...                0:00:03
+[*] Reindexing .samplerr-2023...                 0:04:58
+[*] Reindexing .samplerr-2023.01...              0:19:22
+[+] Done!
 ```
 * [ ] Stop ElasticSearch
 * [ ] Stop Kibana

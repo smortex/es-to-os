@@ -52,7 +52,7 @@ os_templates=$(opensearch GET _index_template | jq -r '.index_templates | .[] | 
 
 for template in $es_templates; do
   if ! echo "${os_templates}" | grep -q $template; then
-    echo "[+] Setup index template $template..."
+    echo "[*] Setup index template $template..."
     opensearch PUT _index_template/$template -d "$(elasticsearch GET _template/$template | jq '.'$template' | {"index_patterns": .index_patterns, "template": { "settings": .settings.index, "mappings": {"properties": .mappings | .[keys[0]] | .properties }}}')" > /dev/null
   fi
 done
@@ -67,7 +67,7 @@ for index in $es_indices; do
       continue
     fi
 
-    printf '[+] Reindexing %s...' $index
+    printf '[*] Reindexing %s...' $index
     (opensearch POST _reindex -d "
 {
   \"source\":{
@@ -82,9 +82,10 @@ for index in $es_indices; do
 }") > /tmp/out
     printf '\033[50G%s\n' $(format_seconds $(jq .took /tmp/out))
     if [ $(jq '.failures | length' /tmp/out) -gt 0 ]; then
-      echo "[!] Error detected while reindexing $index:"
+      echo "[-] Error detected while reindexing $index:"
       jq '.failures' /tmp/out
       exit 1
     fi
   fi
 done
+echo '[+] Done!'
