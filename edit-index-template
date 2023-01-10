@@ -1,0 +1,34 @@
+#!/bin/sh
+# Utility script to edit index templates.
+#
+# ./edit-index-template logs
+
+set -e
+
+index_template=$1
+
+if [ -z $index_template ]; then
+  echo "usage: $0 index_template"
+  exit 1
+fi
+
+tmp_root=$(mktemp -d)
+
+from="${tmp_root}/index_template.json.orig"
+to="${tmp_root}/index_template.json"
+
+curl -sS -X GET --insecure -u admin:admin https://localhost:9200/_index_template/$index_template | jq '.index_templates[0].index_template' > $from
+cp $from $to
+$EDITOR $to
+if diff -u $from $to; then
+  echo "No change, exiting."
+else
+  printf "Apply changes? [yn]"
+  read r
+  case $r in
+    [yY])
+      curl -X PUT --insecure -u admin:admin -H 'Content-Type: application/json' https://localhost:9200/_index_template/$index_template -d@$to
+      ;;
+  esac
+fi
+rm -rf $tmp_root
