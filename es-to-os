@@ -80,7 +80,7 @@ for index in $es_indices; do
     \"index\":\"$index\"
   }
 }") > /tmp/out
-    printf '\033[50G%s\n' $(format_seconds $(jq .took /tmp/out))
+    printf '\033[50G%s\n' "$(format_seconds $(jq .took /tmp/out))"
     if [ $(jq '.failures | length' /tmp/out) -gt 0 ]; then
       echo "[-] Error detected while reindexing $index:"
       jq '.failures' /tmp/out
